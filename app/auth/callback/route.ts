@@ -12,19 +12,24 @@ export async function GET(request: Request) {
     if (!error) {
       // Check if user has completed onboarding
       const { data: { user } } = await supabase.auth.getUser()
+      console.log('Auth callback - user:', user?.id)
 
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('username')
           .eq('id', user.id)
           .single()
 
+        console.log('Auth callback - profile:', profile, 'error:', profileError)
+
         if ((profile as any)?.username) {
           // User has completed onboarding, redirect to feed
+          console.log('Redirecting to /feed')
           return NextResponse.redirect(`${origin}/feed`)
         } else {
           // User needs to complete onboarding
+          console.log('Redirecting to /onboarding')
           return NextResponse.redirect(`${origin}/onboarding`)
         }
       }

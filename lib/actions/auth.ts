@@ -16,7 +16,8 @@ export async function signIn(email: string) {
   })
 
   if (error) {
-    throw new Error(error.message)
+    console.error('Supabase auth error:', error)
+    throw new Error(`Database error: ${error.message} (${error.status})`)
   }
 
   return { success: true, message: 'Check your email for a magic link!' }
