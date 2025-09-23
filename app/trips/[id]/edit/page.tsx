@@ -1,21 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { createTrip } from '@/lib/actions/trips'
+import { createClient } from '@/lib/supabase/client'
 import { tripSchema } from '@/lib/utils/validation'
-import { Loader2 } from 'lucide-react'
-import { ClientNavigation } from '@/components/client-navigation'
+import { Loader2, ArrowLeft, Trash } from 'lucide-react'
 import { toast } from 'sonner'
+import Link from 'next/link'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type TripFormValues = {
   destination: string
@@ -25,9 +35,13 @@ type TripFormValues = {
   is_private: boolean
 }
 
-export default function NewTripPage() {
+export default function EditTripPage({ params }: { params: Promise<{ id: string }> }) {
   const [isLoading, setIsLoading] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [trip, setTrip] = useState<any>(null)
+  const [tripId, setTripId] = useState<string | null>(null)
   const router = useRouter()
+  const supabase = createClient()
 
   const form = useForm<TripFormValues>({
     resolver: zodResolver(tripSchema) as any,
@@ -40,35 +54,145 @@ export default function NewTripPage() {
     },
   })
 
-  const onSubmit: SubmitHandler<TripFormValues> = async (values) => {
-    setIsLoading(true)
-    const formData = new FormData()
-    formData.append('destination', values.destination)
-    formData.append('start_date', values.start_date)
-    formData.append('end_date', values.end_date)
-    formData.append('description', values.description || '')
-    formData.append('is_private', values.is_private.toString())
+  useEffect(() => {
+    async function initPage() {
+      const resolvedParams = await params
+      setTripId(resolvedParams.id)
 
-    try {
-      await createTrip(formData)
-      toast.success('Trip created successfully!')
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Something went wrong')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      const { data: trip, error } = await supabase
+        .from('trips')
+        .select('*')
+        .eq('id', resolvedParams.id)
+        .eq('creator_id', user.id)
+        .single()
+
+      if (error || !trip) {
+        toast.error('Trip not found or you do not have permission to edit it')
+        router.push('/feed')
+        return
+      }
+
+      setTrip(trip)
+      form.reset({
+        destination: trip.destination,
+        start_date: trip.start_date,
+        end_date: trip.end_date,
+        description: trip.description || '',
+        is_private: trip.is_private,
+      })
+    }
+
+    initPage()
+  }, [supabase, router, form, params])
+
+  async function onSubmit(values: TripFormValues) {
+    if (!tripId) return
+    setIsLoading(true)
+
+    const { error } = await supabase
+      .from('trips')
+      .update({
+        destination: values.destination,
+        start_date: values.start_date,
+        end_date: values.end_date,
+        description: values.description || null,
+        is_private: values.is_private,
+      })
+      .eq('id', tripId)
+
+    if (error) {
+      toast.error(error.message)
       setIsLoading(false)
+    } else {
+      toast.success('Trip updated successfully!')
+      router.push(`/trips/${tripId}`)
     }
   }
 
+  async function handleDelete() {
+    if (!tripId) return
+    setIsDeleting(true)
+
+    const { error } = await supabase
+      .from('trips')
+      .delete()
+      .eq('id', tripId)
+
+    if (error) {
+      toast.error(error.message)
+      setIsDeleting(false)
+    } else {
+      toast.success('Trip deleted successfully!')
+      router.push('/feed')
+    }
+  }
+
+  if (!trip) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
   return (
-    <>
-      <ClientNavigation />
-      <div className="min-h-screen p-4 py-8">
+    <div className="min-h-screen p-4 py-8">
       <div className="max-w-2xl mx-auto">
+        {tripId && (
+          <Link href={`/trips/${tripId}`}>
+            <Button variant="ghost" className="mb-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Trip
+            </Button>
+          </Link>
+        )}
+
         <Card>
           <CardHeader>
-            <CardTitle>Create New Trip</CardTitle>
-            <CardDescription>
-              Add a new trip to your travel plans
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Edit Trip</CardTitle>
+                <CardDescription>
+                  Update your trip details
+                </CardDescription>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete this trip?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your trip
+                      and remove all associated data.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                      {isDeleting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        'Delete Trip'
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -167,10 +291,10 @@ export default function NewTripPage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating trip...
+                      Saving changes...
                     </>
                   ) : (
-                    'Create Trip'
+                    'Save Changes'
                   )}
                 </Button>
               </form>
@@ -178,7 +302,6 @@ export default function NewTripPage() {
           </CardContent>
         </Card>
       </div>
-      </div>
-    </>
+    </div>
   )
 }

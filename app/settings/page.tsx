@@ -1,27 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Label } from '@/components/ui/label'
 import { updateProfile, uploadAvatar } from '@/lib/actions/profile'
 import { profileSchema } from '@/lib/utils/validation'
-import { Loader2, Upload } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { Loader2, Upload, ArrowLeft, Bell } from 'lucide-react'
 import { toast } from 'sonner'
+import Link from 'next/link'
+import { z } from 'zod'
 
 type ProfileFormValues = z.infer<typeof profileSchema>
 
-export default function OnboardingPage() {
+export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string>('')
+  const [profile, setProfile] = useState<any>(null)
   const router = useRouter()
+  const supabase = createClient()
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -40,6 +45,37 @@ export default function OnboardingPage() {
       },
     },
   })
+
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (profile) {
+        setProfile(profile)
+        setAvatarUrl(profile.avatar_url || '')
+        form.reset({
+          username: profile.username || '',
+          display_name: profile.display_name || '',
+          bio: profile.bio || '',
+          occupation: profile.occupation || '',
+          base_location: profile.base_location || '',
+          links: profile.links || {},
+        })
+      }
+    }
+
+    loadProfile()
+  }, [supabase, router, form])
 
   async function handleAvatarUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -70,7 +106,8 @@ export default function OnboardingPage() {
 
     try {
       await updateProfile(formData)
-      toast.success('Profile created successfully!')
+      toast.success('Profile updated successfully!')
+      router.push(`/u/${values.username}`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Something went wrong')
       setIsLoading(false)
@@ -80,11 +117,18 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen p-4 py-8">
       <div className="max-w-2xl mx-auto">
+        <Link href={profile ? `/u/${profile.username}` : '/feed'}>
+          <Button variant="ghost" className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Profile
+          </Button>
+        </Link>
+
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Welcome to Trekka!</CardTitle>
+            <CardTitle>Edit Profile</CardTitle>
             <CardDescription>
-              Let&apos;s set up your profile so you can start sharing your travel plans
+              Update your profile information
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -100,7 +144,7 @@ export default function OnboardingPage() {
                   <div>
                     <Label htmlFor="avatar" className="cursor-pointer">
                       <Button type="button" variant="outline" asChild>
-                        <span>Upload Avatar</span>
+                        <span>Change Avatar</span>
                       </Button>
                       <input
                         id="avatar"
@@ -110,9 +154,6 @@ export default function OnboardingPage() {
                         onChange={handleAvatarUpload}
                       />
                     </Label>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Recommended: Square image, at least 200x200px
-                    </p>
                   </div>
                 </div>
 
@@ -121,7 +162,7 @@ export default function OnboardingPage() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Username *</FormLabel>
+                      <FormLabel>Username</FormLabel>
                       <FormControl>
                         <Input placeholder="johndoe" {...field} />
                       </FormControl>
@@ -264,14 +305,23 @@ export default function OnboardingPage() {
                   />
                 </div>
 
+                <div className="pt-4 border-t">
+                  <Link href="/notifications/preferences">
+                    <Button variant="outline" className="w-full mb-4">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Notification Preferences
+                    </Button>
+                  </Link>
+                </div>
+
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating profile...
+                      Saving changes...
                     </>
                   ) : (
-                    'Complete Setup'
+                    'Save Changes'
                   )}
                 </Button>
               </form>
@@ -282,5 +332,3 @@ export default function OnboardingPage() {
     </div>
   )
 }
-
-import { Label } from '@/components/ui/label'

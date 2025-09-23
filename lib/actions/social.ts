@@ -10,25 +10,34 @@ export async function toggleFollow(followedId: string) {
   const supabase = await createClient()
 
   // Check if already following
-  const { data: existing } = await supabase
+  console.log('Checking if following user:', followedId, 'from user:', user.id)
+  const { data: existing, error: checkError } = await supabase
     .from('follows')
     .select()
     .eq('follower_id', user.id)
     .eq('followed_id', followedId)
     .single()
 
+  console.log('Existing follow record:', existing)
+  console.log('Check error:', checkError)
+
   if (existing) {
     // Unfollow
-    const { error } = await supabase
+    console.log('Unfollowing user - deleting record:', existing)
+    const { error, data: deletedData } = await supabase
       .from('follows')
       .delete()
       .eq('follower_id', user.id)
       .eq('followed_id', followedId)
+      .select()
 
+    console.log('Delete result:', deletedData)
+    console.log('Delete error:', error)
     if (error) throw new Error(error.message)
     return { following: false }
   } else {
     // Follow
+    console.log('Attempting to follow user:', followedId, 'from user:', user.id)
     const { error } = await supabase
       .from('follows')
       .insert({
@@ -36,7 +45,10 @@ export async function toggleFollow(followedId: string) {
         followed_id: followedId,
       } as any)
 
-    if (error) throw new Error(error.message)
+    if (error) {
+      console.error('Follow error details:', error)
+      throw new Error(error.message)
+    }
     return { following: true }
   }
 }

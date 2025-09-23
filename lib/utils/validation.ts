@@ -12,6 +12,7 @@ export const profileSchema = z.object({
   display_name: z.string().max(50).optional(),
   bio: z.string().max(240).optional(),
   occupation: z.string().max(100).optional(),
+  base_location: z.string().max(100).optional(),
   links: z.object({
     instagram: z.string().url().optional().or(z.literal('')),
     tiktok: z.string().url().optional().or(z.literal('')),

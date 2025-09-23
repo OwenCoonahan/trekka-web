@@ -16,6 +16,7 @@ export async function updateProfile(formData: FormData) {
     display_name: formData.get('display_name') as string,
     bio: formData.get('bio') as string,
     occupation: formData.get('occupation') as string,
+    base_location: formData.get('base_location') as string,
     links: {
       instagram: formData.get('instagram') as string,
       tiktok: formData.get('tiktok') as string,
@@ -34,6 +35,7 @@ export async function updateProfile(formData: FormData) {
       display_name: validatedData.display_name || null,
       bio: validatedData.bio || null,
       occupation: validatedData.occupation || null,
+      base_location: validatedData.base_location || null,
       links: validatedData.links || {},
     } as any)
     .eq('id', user.id)

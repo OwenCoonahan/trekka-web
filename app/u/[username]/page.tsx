@@ -1,25 +1,31 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { LayoutWrapper } from '@/components/layout-wrapper'
 import { createClient } from '@/lib/supabase/server'
 import { getUserTrips } from '@/lib/actions/trips'
 import { getUser } from '@/lib/actions/auth'
 import { UserAvatar } from '@/components/user-avatar'
 import { TripGrid } from '@/components/trip-grid'
+import { TripCalendar } from '@/components/trip-calendar'
 import { FollowButton } from '@/components/follow-button'
 import { CopyLinkButton } from '@/components/copy-link-button'
 import { SocialLinks } from '@/components/social-links'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Edit, MapPin } from 'lucide-react'
 import { isUpcoming, isPast } from '@/lib/utils/dates'
 
-export default async function ProfilePage({ params }: { params: { username: string } }) {
+export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params
   const supabase = await createClient()
   const currentUser = await getUser()
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
-    .eq('username', params.username)
+    .eq('username', username)
     .single()
 
   const typedProfile = profile as any
@@ -33,10 +39,11 @@ export default async function ProfilePage({ params }: { params: { username: stri
   const pastTrips = trips.filter((trip: any) => isPast(trip.start_date, trip.end_date))
 
   const isOwnProfile = currentUser?.id === typedProfile.id
-  const profileUrl = `${process.env.NEXT_PUBLIC_APP_URL}/u/${typedProfile.username}`
+  const profileUrl = `${process.env.NEXT_PUBLIC_APP_URL}/u/${username}`
 
   return (
-    <div className="min-h-screen p-4 py-8">
+    <LayoutWrapper>
+      <div className="min-h-screen p-4 py-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <Card>
           <CardHeader>
@@ -52,16 +59,31 @@ export default async function ProfilePage({ params }: { params: { username: stri
                     {typedProfile.display_name || typedProfile.username}
                   </h1>
                   <p className="text-muted-foreground">@{typedProfile.username}</p>
-                  {typedProfile.occupation && (
-                    <Badge variant="secondary" className="mt-2">
-                      {typedProfile.occupation}
-                    </Badge>
-                  )}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {typedProfile.occupation && (
+                      <Badge variant="secondary">
+                        {typedProfile.occupation}
+                      </Badge>
+                    )}
+                    {typedProfile.base_location && (
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {typedProfile.base_location}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex gap-2">
-                {!isOwnProfile && currentUser && (
-                  <FollowButton userId={typedProfile.id} />
+                {isOwnProfile ? (
+                  <Link href="/settings">
+                    <Button variant="outline">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </Link>
+                ) : (
+                  currentUser && <FollowButton userId={typedProfile.id} />
                 )}
                 <CopyLinkButton url={profileUrl} />
               </div>
@@ -80,12 +102,15 @@ export default async function ProfilePage({ params }: { params: { username: stri
         </Card>
 
         <Tabs defaultValue="upcoming" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="upcoming">
               Upcoming ({upcomingTrips.length})
             </TabsTrigger>
             <TabsTrigger value="past">
               Past ({pastTrips.length})
+            </TabsTrigger>
+            <TabsTrigger value="calendar">
+              Calendar
             </TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming" className="mt-6">
@@ -94,8 +119,12 @@ export default async function ProfilePage({ params }: { params: { username: stri
           <TabsContent value="past" className="mt-6">
             <TripGrid trips={pastTrips} />
           </TabsContent>
+          <TabsContent value="calendar" className="mt-6">
+            <TripCalendar trips={trips} userProfile={typedProfile} />
+          </TabsContent>
         </Tabs>
       </div>
-    </div>
+      </div>
+    </LayoutWrapper>
   )
 }

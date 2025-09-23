@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { LayoutWrapper } from '@/components/layout-wrapper'
 import Link from 'next/link'
 import { getTripWithInterests } from '@/lib/actions/trips'
 import { generateICS } from '@/lib/actions/calendar'
@@ -6,14 +7,16 @@ import { getUser } from '@/lib/actions/auth'
 import { UserAvatar } from '@/components/user-avatar'
 import { InterestedButton } from '@/components/interested-button'
 import { CopyLinkButton } from '@/components/copy-link-button'
+import { DestinationWithFlag } from '@/components/destination-with-flag'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDateRange } from '@/lib/utils/dates'
-import { MapPin, Calendar, Lock, Download } from 'lucide-react'
+import { MapPin, Calendar, Lock, Download, Edit } from 'lucide-react'
 
-export default async function TripPage({ params }: { params: { id: string } }) {
-  const trip = await getTripWithInterests(params.id)
+export default async function TripPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const trip = await getTripWithInterests(id)
   const user = await getUser()
 
   if (!trip) {
@@ -27,7 +30,8 @@ export default async function TripPage({ params }: { params: { id: string } }) {
   const interestedUsers = trip.interests?.filter(i => i.status === 'interested') || []
 
   return (
-    <div className="min-h-screen p-4 py-8">
+    <LayoutWrapper>
+      <div className="min-h-screen p-4 py-8">
       <div className="max-w-4xl mx-auto">
         <Card>
           <CardHeader>
@@ -35,7 +39,7 @@ export default async function TripPage({ params }: { params: { id: string } }) {
               <div className="space-y-1">
                 <CardTitle className="text-2xl flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
-                  {trip.destination}
+                  <DestinationWithFlag destination={trip.destination} />
                 </CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -83,6 +87,14 @@ export default async function TripPage({ params }: { params: { id: string } }) {
 
             {/* Actions */}
             <div className="flex flex-wrap gap-2">
+              {isOwner && (
+                <Link href={`/trips/${trip.id}/edit`}>
+                  <Button variant="outline">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Trip
+                  </Button>
+                </Link>
+              )}
               {user && !isOwner && (
                 <InterestedButton
                   tripId={trip.id}
@@ -127,6 +139,7 @@ export default async function TripPage({ params }: { params: { id: string } }) {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </LayoutWrapper>
   )
 }

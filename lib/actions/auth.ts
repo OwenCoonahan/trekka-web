@@ -23,6 +23,27 @@ export async function signIn(email: string) {
   return { success: true, message: 'Check your email for a magic link!' }
 }
 
+export async function signInWithGoogle() {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    },
+  })
+
+  if (error) {
+    console.error('Google auth error:', error)
+    throw new Error(`Authentication error: ${error.message}`)
+  }
+
+  if (data.url) {
+    redirect(data.url)
+  }
+}
+
+
 export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
