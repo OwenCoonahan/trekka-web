@@ -28,17 +28,20 @@ export function CopyLinkButton({ url, className }: CopyLinkButtonProps) {
     <Button
       onClick={handleCopy}
       variant="outline"
+      size="sm"
       className={className}
     >
       {copied ? (
         <>
           <Check className="h-4 w-4 mr-2" />
-          Copied!
+          <span className="hidden sm:inline">Copied!</span>
+          <span className="sm:hidden">✓</span>
         </>
       ) : (
         <>
           <Copy className="h-4 w-4 mr-2" />
-          Copy Link
+          <span className="hidden sm:inline">Copy Link</span>
+          <span className="sm:hidden">Copy</span>
         </>
       )}
     </Button>

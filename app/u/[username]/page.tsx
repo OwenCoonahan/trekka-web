@@ -47,7 +47,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       <div className="max-w-6xl mx-auto space-y-6">
         <Card>
           <CardHeader>
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col space-y-4 md:flex-row md:items-start md:justify-between md:space-y-0">
               <div className="flex items-center gap-4">
                 <UserAvatar
                   src={typedProfile.avatar_url}
@@ -55,7 +55,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   size="xl"
                 />
                 <div>
-                  <h1 className="text-2xl font-bold">
+                  <h1 className="text-xl md:text-2xl font-bold">
                     {typedProfile.display_name || typedProfile.username}
                   </h1>
                   <p className="text-muted-foreground">@{typedProfile.username}</p>
@@ -74,12 +74,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {isOwnProfile ? (
                   <Link href="/settings">
-                    <Button variant="outline">
+                    <Button variant="outline" size="sm" className="flex-1 min-w-0">
                       <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
+                      <span className="hidden sm:inline">Edit Profile</span>
+                      <span className="sm:hidden">Edit</span>
                     </Button>
                   </Link>
                 ) : (
