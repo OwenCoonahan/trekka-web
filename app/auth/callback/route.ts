@@ -15,6 +15,9 @@ export async function GET(request: Request) {
       console.log('Auth callback - user:', user?.id)
 
       if (user) {
+        // Add a small delay to ensure database trigger has completed
+        await new Promise(resolve => setTimeout(resolve, 500))
+
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('username')
@@ -22,6 +25,13 @@ export async function GET(request: Request) {
           .single()
 
         console.log('Auth callback - profile:', profile, 'error:', profileError)
+
+        // Handle profile query errors
+        if (profileError) {
+          console.log('Profile query error, redirecting to onboarding:', profileError)
+          // If profile doesn't exist or error occurred, redirect to onboarding
+          return NextResponse.redirect(`${origin}/onboarding`)
+        }
 
         if ((profile as any)?.username) {
           // User has completed onboarding, redirect to feed
