@@ -3,7 +3,6 @@
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Trekka <notifications@trekka.com>'
 
 interface EmailNotificationData {
@@ -20,6 +19,7 @@ export async function sendEmailNotification({ type, recipientEmail, recipientNam
   }
 
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY)
     const { subject, html } = getEmailTemplate(type, data)
 
     await resend.emails.send({
