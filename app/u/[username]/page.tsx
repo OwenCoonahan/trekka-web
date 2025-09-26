@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Edit, MapPin } from 'lucide-react'
+import { Edit, MapPin, Plane, Home } from 'lucide-react'
 import { isUpcoming, isPast } from '@/lib/utils/dates'
 
 export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
@@ -67,7 +67,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                     )}
                     {typedProfile.base_location && (
                       <Badge variant="outline" className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
+                        {typedProfile.base_location.toLowerCase() === 'fully nomadic' ? (
+                          <Plane className="h-3 w-3" />
+                        ) : (
+                          <Home className="h-3 w-3" />
+                        )}
                         {typedProfile.base_location}
                       </Badge>
                     )}
@@ -86,7 +90,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 ) : (
                   currentUser && <FollowButton userId={typedProfile.id} />
                 )}
-                <CopyLinkButton url={profileUrl} />
+                <CopyLinkButton url={profileUrl} size="sm" />
               </div>
             </div>
           </CardHeader>

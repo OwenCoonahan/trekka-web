@@ -112,13 +112,25 @@ export async function updateNotificationPreferences(formData: FormData) {
     phone_number: formData.get('phone_number') as string || null,
   }
 
-  const { error } = await supabase
+  // Try to update first
+  const { error: updateError } = await supabase
     .from('notification_preferences')
-    .upsert({
-      user_id: user.id,
+    .update({
       ...preferences,
       updated_at: new Date().toISOString()
     })
+    .eq('user_id', user.id)
 
-  if (error) throw new Error(error.message)
+  // If update fails because no record exists, create one
+  if (updateError) {
+    const { error: insertError } = await supabase
+      .from('notification_preferences')
+      .insert({
+        user_id: user.id,
+        ...preferences,
+        updated_at: new Date().toISOString()
+      })
+
+    if (insertError) throw new Error(insertError.message)
+  }
 }

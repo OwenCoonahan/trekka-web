@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { ArrowLeft, Bell, Mail, MessageSquare, MapPin, User, Plus, Edit } from 'lucide-react'
 import Link from 'next/link'
 import { getNotificationPreferences, updateNotificationPreferences } from '@/lib/actions/notifications'
+// import { PushNotificationSetup } from '@/components/push-notification-setup'
 
 interface NotificationPreferences {
   trip_added: boolean
@@ -99,7 +100,10 @@ export default function NotificationPreferencesPage() {
           </Button>
         </Link>
 
-        <Card>
+        <div className="space-y-6">
+          {/* <PushNotificationSetup /> */}
+
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
@@ -197,7 +201,7 @@ export default function NotificationPreferencesPage() {
                       <Mail className="h-4 w-4" />
                       <div>
                         <Label htmlFor="email_notifications" className="font-medium">Email Notifications</Label>
-                        <p className="text-sm text-muted-foreground">Receive notifications via email (coming soon)</p>
+                        <p className="text-sm text-muted-foreground">Receive notifications via email</p>
                       </div>
                     </div>
                     <Switch
@@ -205,7 +209,6 @@ export default function NotificationPreferencesPage() {
                       name="email_notifications"
                       checked={preferences.email_notifications}
                       onCheckedChange={(checked) => handleToggle('email_notifications', checked)}
-                      disabled
                     />
                   </div>
 
@@ -250,6 +253,7 @@ export default function NotificationPreferencesPage() {
             </form>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   )

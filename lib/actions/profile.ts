@@ -47,7 +47,7 @@ export async function updateProfile(formData: FormData) {
     throw new Error(error.message)
   }
 
-  redirect('/feed')
+  return { success: true }
 }
 
 export async function uploadAvatar(file: File) {
@@ -78,4 +78,25 @@ export async function uploadAvatar(file: File) {
   if (updateError) throw new Error(updateError.message)
 
   return publicUrl
+}
+
+export async function searchProfiles(query: string) {
+  if (!query || query.length < 2) {
+    return []
+  }
+
+  const supabase = await createClient()
+
+  const { data: profiles, error } = await supabase
+    .from('profiles')
+    .select('id, username, display_name, avatar_url')
+    .or(`username.ilike.%${query}%,display_name.ilike.%${query}%`)
+    .limit(10)
+
+  if (error) {
+    console.error('Error searching profiles:', error)
+    return []
+  }
+
+  return profiles || []
 }

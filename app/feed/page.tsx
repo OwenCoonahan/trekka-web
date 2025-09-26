@@ -6,6 +6,7 @@ import { getFeedTrips } from '@/lib/actions/social'
 import { TripCard } from '@/components/trip-card'
 import { TripGrid } from '@/components/trip-grid'
 import { MonthSection } from '@/components/month-section'
+import { DiscoverSection } from '@/components/discover-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -136,54 +137,10 @@ export default async function FeedPage() {
 
             {/* Discover Tab */}
             <TabsContent value="discover" className="mt-6">
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Compass className="h-5 w-5" />
-                      Discover Travel Plans
-                    </CardTitle>
-                    <CardDescription>
-                      Find travel buddies and discover amazing destinations from the Trekka community
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-
-                {upcomingDiscoverTrips.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-8 text-center text-muted-foreground">
-                      No upcoming public trips found. Be the first to share your travel plans!
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-6">
-                    {/* Popular Destinations */}
-                    {popularDestinations.length > 0 && (
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold">Popular Destinations</h3>
-                        {popularDestinations.slice(0, 3).map(([destination, destinationTrips]: any) => (
-                          <Card key={destination}>
-                            <CardHeader>
-                              <CardTitle className="text-lg">
-                                {destination} ({destinationTrips.length} trip{destinationTrips.length !== 1 ? 's' : ''})
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <TripGrid trips={destinationTrips} />
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* All Upcoming Trips */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">All Upcoming Trips</h3>
-                      <TripGrid trips={upcomingDiscoverTrips} />
-                    </div>
-                  </div>
-                )}
-              </div>
+              <DiscoverSection
+                trips={upcomingDiscoverTrips}
+                popularDestinations={popularDestinations}
+              />
             </TabsContent>
           </Tabs>
         </div>

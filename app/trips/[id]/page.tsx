@@ -7,12 +7,39 @@ import { getUser } from '@/lib/actions/auth'
 import { UserAvatar } from '@/components/user-avatar'
 import { InterestedButton } from '@/components/interested-button'
 import { CopyLinkButton } from '@/components/copy-link-button'
+import { BackButton } from '@/components/back-button'
 import { DestinationWithFlag } from '@/components/destination-with-flag'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDateRange } from '@/lib/utils/dates'
 import { MapPin, Calendar, Lock, Download, Edit } from 'lucide-react'
+
+// Tag configuration for colors and icons
+const getTagConfig = (tag: string) => {
+  const tagLower = tag.toLowerCase()
+
+  const configs: Record<string, { icon: string; className: string }> = {
+    work: { icon: '💼', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
+    business: { icon: '💼', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
+    exploring: { icon: '🗺️', className: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' },
+    adventure: { icon: '🏔️', className: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' },
+    social: { icon: '🎉', className: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' },
+    friends: { icon: '👥', className: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' },
+    family: { icon: '👨‍👩‍👧‍👦', className: 'bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300' },
+    sports: { icon: '⚽', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' },
+    fitness: { icon: '💪', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' },
+    culture: { icon: '🎭', className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300' },
+    food: { icon: '🍴', className: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
+    relaxation: { icon: '🧘', className: 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300' },
+    beach: { icon: '🏖️', className: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300' },
+    skiing: { icon: '⛷️', className: 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300' },
+    conference: { icon: '📊', className: 'bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300' },
+    wedding: { icon: '💒', className: 'bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300' }
+  }
+
+  return configs[tagLower] || { icon: '🏷️', className: 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300' }
+}
 
 export default async function TripPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -33,6 +60,10 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
     <LayoutWrapper>
       <div className="min-h-screen p-4 py-8">
       <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-4">
+          <BackButton />
+        </div>
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -74,6 +105,20 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
                 </Link>
               </div>
             </div>
+
+            {/* Trip Tags */}
+            {trip.tags && trip.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {trip.tags.map((tag) => {
+                  const tagConfig = getTagConfig(tag)
+                  return (
+                    <Badge key={tag} variant="secondary" className={tagConfig.className}>
+                      {tagConfig.icon} {tag}
+                    </Badge>
+                  )
+                })}
+              </div>
+            )}
 
             {/* Description */}
             {trip.description && (

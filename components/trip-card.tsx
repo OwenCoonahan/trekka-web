@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatDateRange } from '@/lib/utils/dates'
 import { DestinationWithFlag } from '@/components/destination-with-flag'
 import { UserAvatar } from '@/components/user-avatar'
+import { TripParticipants } from '@/components/trip-participants'
 import { MapPin, Calendar, Lock } from 'lucide-react'
 import { Trip } from '@/types/database'
 
@@ -39,6 +40,18 @@ export function TripCard({ trip }: TripCardProps) {
               {trip.description}
             </CardDescription>
           )}
+
+          {trip.participants && Array.isArray(trip.participants) && trip.participants.length > 0 && (
+            <div className="mt-2">
+              <TripParticipants
+                participants={trip.participants as any[]}
+                showLabel={true}
+                maxVisible={3}
+                className="text-sm"
+              />
+            </div>
+          )}
+
           {trip.creator && (
             <div className="flex items-center gap-2 mt-2">
               <UserAvatar

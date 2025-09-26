@@ -44,7 +44,7 @@ export default async function DiscoverPage() {
             <CardHeader>
               <CardTitle>Discover Travel Plans</CardTitle>
               <CardDescription>
-                Find travel buddies and discover amazing destinations from the Trekka community
+                Creating serendipity and new connections between those living life to the fullest
               </CardDescription>
             </CardHeader>
           </Card>

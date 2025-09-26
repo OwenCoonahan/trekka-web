@@ -7,14 +7,15 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { updateProfile, uploadAvatar } from '@/lib/actions/profile'
 import { profileSchema } from '@/lib/utils/validation'
-import { Loader2, Upload } from 'lucide-react'
+import { Loader2, Upload, Plane } from 'lucide-react'
 import { toast } from 'sonner'
+import { Label } from '@/components/ui/label'
 
 type ProfileFormValues = z.infer<typeof profileSchema>
 
@@ -69,8 +70,11 @@ export default function OnboardingPage() {
     formData.append('website', values.links?.website || '')
 
     try {
-      await updateProfile(formData)
+      const result = await updateProfile(formData)
       toast.success('Profile created successfully!')
+      if (result?.success) {
+        router.push('/feed')
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Something went wrong')
       setIsLoading(false)
@@ -165,8 +169,23 @@ export default function OnboardingPage() {
                     <FormItem>
                       <FormLabel>Home Base</FormLabel>
                       <FormControl>
-                        <Input placeholder="New York, NY or Fully Nomadic" {...field} />
+                        <div className="space-y-2">
+                          <Input placeholder="New York, NY or Fully Nomadic" {...field} />
+                          <Button
+                            type="button"
+                            variant={field.value?.toLowerCase() === 'fully nomadic' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => field.onChange(field.value?.toLowerCase() === 'fully nomadic' ? '' : 'Fully Nomadic')}
+                            className="w-full"
+                          >
+                            <Plane className="h-4 w-4 mr-2" />
+                            Set as Fully Nomadic
+                          </Button>
+                        </div>
                       </FormControl>
+                      <FormDescription>
+                        Enter your home city or select "Fully Nomadic" if you don't have a fixed base
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -282,5 +301,3 @@ export default function OnboardingPage() {
     </div>
   )
 }
-
-import { Label } from '@/components/ui/label'

@@ -5,12 +5,20 @@ import { tripSchema } from '@/lib/utils/validation'
 import { redirect } from 'next/navigation'
 import { getUser } from './auth'
 import { TripWithCreator, TripWithInterests } from '@/types/database'
+import { sendEmailNotification } from './email-notifications'
+// import { sendPushNotification } from './push-notifications'
 
 export async function createTrip(formData: FormData) {
   const user = await getUser()
   if (!user) throw new Error('Not authenticated')
 
   const supabase = await createClient()
+
+  const tagsString = formData.get('tags') as string
+  const tags = tagsString ? JSON.parse(tagsString) : []
+
+  const participantsString = formData.get('participants') as string
+  const participants = participantsString ? JSON.parse(participantsString) : []
 
   const data = {
     destination: formData.get('destination') as string,
@@ -27,13 +35,18 @@ export async function createTrip(formData: FormData) {
     .insert({
       creator_id: user.id,
       ...validatedData,
+      tags: tags,
+      participants: participants,
     } as any)
     .select()
     .single()
 
   if (error) throw new Error(error.message)
 
-  redirect(`/trips/${(trip as any).id}`)
+  // Send notifications to followers
+  await sendTripNotifications('trip_added', trip as any)
+
+  return { tripId: (trip as any).id }
 }
 
 export async function getTrip(id: string): Promise<TripWithCreator | null> {
@@ -110,4 +123,72 @@ export async function deleteTrip(id: string) {
     .eq('creator_id', user.id)
 
   if (error) throw new Error(error.message)
+}
+
+// Helper function to send notifications for trip events
+async function sendTripNotifications(type: 'trip_added' | 'trip_updated', trip: any) {
+  const supabase = await createClient()
+
+  // Get the trip creator's profile
+  const { data: creator } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', trip.creator_id)
+    .single()
+
+  if (!creator) return
+
+  // Get followers who want this type of notification
+  const { data: followers } = await supabase
+    .from('follows')
+    .select(`
+      follower_id,
+      profiles!follows_follower_id_fkey (
+        id,
+        username,
+        display_name,
+        email,
+        notification_preferences (
+          ${type},
+          email_notifications
+        )
+      )
+    `)
+    .eq('followed_id', trip.creator_id)
+
+  if (!followers?.length) return
+
+  const tripData = {
+    ...trip,
+    creator,
+    creator_display_name: creator.display_name,
+    creator_username: creator.username
+  }
+
+  // Send notifications to each follower
+  for (const follower of followers) {
+    const profile = follower.profiles
+    const preferences = profile?.notification_preferences?.[0]
+
+    // Check if user wants this type of notification
+    if (!preferences || !preferences[type]) continue
+
+    // Send email if enabled
+    if (preferences.email_notifications && profile?.email) {
+      await sendEmailNotification({
+        type,
+        recipientEmail: profile.email,
+        recipientName: profile.display_name || profile.username,
+        data: tripData
+      }).catch(console.error)
+    }
+
+    // Send push notification (temporarily disabled for debugging)
+    // await sendPushNotification(profile.id, {
+    //   type,
+    //   title: type === 'trip_added' ? '✈️ New Trip Added!' : '📝 Trip Updated!',
+    //   message: `${creator.display_name || creator.username} ${type === 'trip_added' ? 'is planning a trip to' : 'updated their trip to'} ${trip.destination}`,
+    //   data: tripData
+    // }).catch(console.error)
+  }
 }

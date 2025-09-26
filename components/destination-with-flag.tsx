@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getCountryFlagWithAliases } from '@/lib/utils/countries'
+import { locationService } from '@/lib/services/location'
 
 interface DestinationWithFlagProps {
   destination: string
@@ -18,30 +18,14 @@ export function DestinationWithFlag({
   const [loading, setLoading] = useState(showFlag)
 
   useEffect(() => {
-    if (!showFlag) return
-
-    let mounted = true
-
-    async function fetchFlag() {
-      try {
-        const countryFlag = await getCountryFlagWithAliases(destination)
-        if (mounted) {
-          setFlag(countryFlag)
-          setLoading(false)
-        }
-      } catch (error) {
-        console.error('Error fetching flag:', error)
-        if (mounted) {
-          setLoading(false)
-        }
-      }
+    if (!showFlag) {
+      setLoading(false)
+      return
     }
 
-    fetchFlag()
-
-    return () => {
-      mounted = false
-    }
+    const flagEmoji = locationService.getFlagEmoji(destination)
+    setFlag(flagEmoji)
+    setLoading(false)
   }, [destination, showFlag])
 
   return (

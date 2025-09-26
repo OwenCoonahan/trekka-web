@@ -15,6 +15,9 @@ import { createTrip } from '@/lib/actions/trips'
 import { tripSchema } from '@/lib/utils/validation'
 import { Loader2 } from 'lucide-react'
 import { ClientNavigation } from '@/components/client-navigation'
+import { TagSelector } from '@/components/tag-selector'
+import { LocationAutocomplete } from '@/components/ui/location-autocomplete'
+import { ParticipantsSelector, Participant } from '@/components/participants-selector'
 import { toast } from 'sonner'
 
 type TripFormValues = {
@@ -23,10 +26,13 @@ type TripFormValues = {
   end_date: string
   description?: string
   is_private: boolean
+  tags?: string[]
 }
 
 export default function NewTripPage() {
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [participants, setParticipants] = useState<Participant[]>([])
   const router = useRouter()
 
   const form = useForm<TripFormValues>({
@@ -37,6 +43,7 @@ export default function NewTripPage() {
       end_date: '',
       description: '',
       is_private: false,
+      tags: [],
     },
   })
 
@@ -48,10 +55,15 @@ export default function NewTripPage() {
     formData.append('end_date', values.end_date)
     formData.append('description', values.description || '')
     formData.append('is_private', values.is_private.toString())
+    formData.append('tags', JSON.stringify(selectedTags))
+    formData.append('participants', JSON.stringify(participants))
 
     try {
-      await createTrip(formData)
+      const result = await createTrip(formData)
       toast.success('Trip created successfully!')
+      if (result?.tripId) {
+        router.push(`/trips/${result.tripId}`)
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Something went wrong')
       setIsLoading(false)
@@ -80,7 +92,12 @@ export default function NewTripPage() {
                     <FormItem>
                       <FormLabel>Destination *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Paris, France" {...field} />
+                        <LocationAutocomplete
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Search for cities or countries..."
+                          showFlag={true}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -136,6 +153,25 @@ export default function NewTripPage() {
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+
+                <div className="space-y-2">
+                  <Label>Trip Tags</Label>
+                  <TagSelector
+                    selectedTags={selectedTags}
+                    onTagToggle={(tag) => {
+                      setSelectedTags(prev =>
+                        prev.includes(tag)
+                          ? prev.filter(t => t !== tag)
+                          : [...prev, tag]
+                      )
+                    }}
+                  />
+                </div>
+
+                <ParticipantsSelector
+                  participants={participants}
+                  onChange={setParticipants}
                 />
 
                 <FormField

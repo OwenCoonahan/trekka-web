@@ -20,6 +20,8 @@ export interface Database {
           occupation: string | null
           plan: string
           created_at: string
+          email: string | null
+          base_location: string | null
         }
         Insert: {
           id: string
@@ -31,6 +33,8 @@ export interface Database {
           occupation?: string | null
           plan?: string
           created_at?: string
+          email?: string | null
+          base_location?: string | null
         }
         Update: {
           id?: string
@@ -42,6 +46,8 @@ export interface Database {
           occupation?: string | null
           plan?: string
           created_at?: string
+          email?: string | null
+          base_location?: string | null
         }
       }
       trips: {
@@ -53,6 +59,8 @@ export interface Database {
           end_date: string
           description: string | null
           is_private: boolean
+          tags: string[] | null
+          participants: Json | null
           created_at: string
         }
         Insert: {
@@ -63,6 +71,8 @@ export interface Database {
           end_date: string
           description?: string | null
           is_private?: boolean
+          tags?: string[] | null
+          participants?: Json | null
           created_at?: string
         }
         Update: {
@@ -73,6 +83,8 @@ export interface Database {
           end_date?: string
           description?: string | null
           is_private?: boolean
+          tags?: string[] | null
+          participants?: Json | null
           created_at?: string
         }
       }
@@ -117,6 +129,114 @@ export interface Database {
           status?: 'interested' | 'not_interested'
           message?: string | null
           created_at?: string
+        }
+      }
+      notification_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          trip_added: boolean
+          trip_updated: boolean
+          city_overlap: boolean
+          follow: boolean
+          email_notifications: boolean
+          sms_notifications: boolean
+          phone_number: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          trip_added?: boolean
+          trip_updated?: boolean
+          city_overlap?: boolean
+          follow?: boolean
+          email_notifications?: boolean
+          sms_notifications?: boolean
+          phone_number?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          trip_added?: boolean
+          trip_updated?: boolean
+          city_overlap?: boolean
+          follow?: boolean
+          email_notifications?: boolean
+          sms_notifications?: boolean
+          phone_number?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          message: string
+          data: Json
+          read: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title: string
+          message: string
+          data?: Json
+          read?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          title?: string
+          message?: string
+          data?: Json
+          read?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      push_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          endpoint?: string
+          p256dh?: string
+          auth?: string
+          active?: boolean
+          created_at?: string
+          updated_at?: string
         }
       }
     }

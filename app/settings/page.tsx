@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { updateProfile, uploadAvatar } from '@/lib/actions/profile'
 import { profileSchema } from '@/lib/utils/validation'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, Upload, ArrowLeft, Bell } from 'lucide-react'
+import { Loader2, Upload, ArrowLeft, Bell, Plane } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { z } from 'zod'
@@ -206,8 +206,23 @@ export default function SettingsPage() {
                     <FormItem>
                       <FormLabel>Home Base</FormLabel>
                       <FormControl>
-                        <Input placeholder="New York, NY or Fully Nomadic" {...field} />
+                        <div className="space-y-2">
+                          <Input placeholder="New York, NY or Fully Nomadic" {...field} />
+                          <Button
+                            type="button"
+                            variant={field.value?.toLowerCase() === 'fully nomadic' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => field.onChange(field.value?.toLowerCase() === 'fully nomadic' ? '' : 'Fully Nomadic')}
+                            className="w-full"
+                          >
+                            <Plane className="h-4 w-4 mr-2" />
+                            Set as Fully Nomadic
+                          </Button>
+                        </div>
                       </FormControl>
+                      <FormDescription>
+                        Enter your home city or select "Fully Nomadic" if you don't have a fixed base
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

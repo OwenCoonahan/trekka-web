@@ -8,9 +8,10 @@ import { useState } from 'react'
 interface CopyLinkButtonProps {
   url: string
   className?: string
+  size?: 'default' | 'sm' | 'lg' | 'icon'
 }
 
-export function CopyLinkButton({ url, className }: CopyLinkButtonProps) {
+export function CopyLinkButton({ url, className, size = 'default' }: CopyLinkButtonProps) {
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
@@ -28,7 +29,7 @@ export function CopyLinkButton({ url, className }: CopyLinkButtonProps) {
     <Button
       onClick={handleCopy}
       variant="outline"
-      size="sm"
+      size={size}
       className={className}
     >
       {copied ? (
