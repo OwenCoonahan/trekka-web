@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { getUser } from '@/lib/actions/auth'
+import { getUser, getProfile } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { MapPin, Users, Calendar, Star } from 'lucide-react'
@@ -9,6 +9,14 @@ export default async function HomePage() {
   const user = await getUser()
 
   if (user) {
+    const profile = await getProfile()
+
+    // If user is authenticated but hasn't completed onboarding, redirect to onboarding
+    if (!profile?.username) {
+      redirect('/onboarding')
+    }
+
+    // User has completed onboarding, redirect to feed
     redirect('/feed')
   }
 
