@@ -8,7 +8,9 @@ export async function LayoutWrapper({ children }: { children: React.ReactNode })
   return (
     <>
       <Navigation user={user} profile={profile as any} showBack={true} />
-      {children}
+      <div className="pb-20 md:pb-0">
+        {children}
+      </div>
     </>
   )
 }
