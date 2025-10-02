@@ -70,11 +70,9 @@ export default function OnboardingPage() {
     formData.append('website', values.links?.website || '')
 
     try {
-      const result = await updateProfile(formData)
+      await updateProfile(formData)
+      // Server action will handle redirect to /feed
       toast.success('Profile created successfully!')
-      if (result?.success) {
-        router.push('/feed')
-      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Something went wrong')
       setIsLoading(false)

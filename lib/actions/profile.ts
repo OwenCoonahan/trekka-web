@@ -47,7 +47,8 @@ export async function updateProfile(formData: FormData) {
     throw new Error(error.message)
   }
 
-  return { success: true }
+  // Use server-side redirect to ensure cache is invalidated
+  redirect('/feed')
 }
 
 export async function uploadAvatar(file: File) {
