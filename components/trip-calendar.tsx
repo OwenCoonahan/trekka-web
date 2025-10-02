@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -8,6 +8,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSam
 import { Trip } from '@/types/database'
 import Link from 'next/link'
 import { locationService } from '@/lib/services/location'
+import { TripAgenda } from './trip-agenda'
 
 interface TripCalendarProps {
   trips: (Trip & { creator?: any })[]
@@ -32,6 +33,18 @@ const regionColors = {
 
 export function TripCalendar({ trips, userProfile }: TripCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
@@ -65,6 +78,11 @@ export function TripCalendar({ trips, userProfile }: TripCalendarProps) {
       const tripEnd = parseISO(trip.end_date)
       return isWithinInterval(day, { start: tripStart, end: tripEnd })
     })
+  }
+
+  // Show agenda view on mobile, calendar on desktop
+  if (isMobile) {
+    return <TripAgenda trips={trips} userProfile={userProfile} />
   }
 
   return (
