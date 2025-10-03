@@ -98,7 +98,7 @@ export default async function HomePage() {
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
               <Image
                 src="/images/hero-1.jpg"
-                alt="Friends connecting over breakfast by the pool"
+                alt="Group exploration on salt flats with adventure vehicles"
                 fill
                 className="object-cover"
               />
@@ -106,7 +106,7 @@ export default async function HomePage() {
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
               <Image
                 src="/images/hero-2.jpg"
-                alt="Adventure travel with friends exploring on motorcycles"
+                alt="POV motorcycle adventure through jungle trails"
                 fill
                 className="object-cover"
               />
@@ -114,7 +114,7 @@ export default async function HomePage() {
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
               <Image
                 src="/images/hero-3.jpg"
-                alt="Digital nomads working together in a beautiful villa"
+                alt="Friends exploring waterfall together in nature"
                 fill
                 className="object-cover"
               />
