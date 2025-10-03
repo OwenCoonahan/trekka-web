@@ -106,7 +106,7 @@ export default async function HomePage() {
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
               <Image
                 src="/images/hero-2.jpg"
-                alt="Digital nomads working together in a beautiful villa"
+                alt="Local cafe culture and authentic travel experiences"
                 fill
                 className="object-cover"
               />
@@ -114,7 +114,7 @@ export default async function HomePage() {
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
               <Image
                 src="/images/hero-3.jpg"
-                alt="Adventure travel and desert exploration with friends"
+                alt="Digital nomads working together in a beautiful villa"
                 fill
                 className="object-cover"
               />
