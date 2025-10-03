@@ -91,6 +91,38 @@ export default async function HomePage() {
         </div>
       </div>
 
+      {/* Visual Hero Gallery */}
+      <div className="py-12 md:py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
+              <Image
+                src="/images/hero-1.jpg"
+                alt="Friends connecting over breakfast by the pool"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
+              <Image
+                src="/images/hero-2.jpg"
+                alt="Digital nomads working together in a beautiful villa"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
+              <Image
+                src="/images/hero-3.jpg"
+                alt="Remote work by the pool at sunset"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Problem Statement */}
       <div id="how-it-works" className="bg-muted/30 py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
