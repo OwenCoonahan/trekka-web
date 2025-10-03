@@ -106,7 +106,7 @@ export default async function HomePage() {
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
               <Image
                 src="/images/hero-2.jpg"
-                alt="Local cafe culture and authentic travel experiences"
+                alt="Adventure travel with friends exploring on motorcycles"
                 fill
                 className="object-cover"
               />
