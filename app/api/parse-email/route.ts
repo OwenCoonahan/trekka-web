@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import OpenAI from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
-function getOpenAI() {
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!,
-  })
+function getGemini() {
+  return new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 }
 
 interface ParsedTripData {
@@ -24,7 +22,7 @@ async function parseEmailWithAI(emailBody: string, emailSubject: string): Promis
 Email Subject: ${emailSubject}
 
 Email Body:
-${emailBody.substring(0, 3000)} // Limit to prevent token overflow
+${emailBody.substring(0, 10000)}
 
 Extract and return JSON with this exact structure:
 {
@@ -45,24 +43,17 @@ Rules:
 - Return ONLY the JSON object, nothing else`
 
   try {
-    const openai = getOpenAI()
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // Cheaper and faster for this task
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a travel email parser. Extract trip details and return ONLY valid JSON.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.1, // Low temperature for consistent parsing
-      response_format: { type: 'json_object' }, // Ensure JSON response
+    const genai = getGemini()
+    const model = genai.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        temperature: 0.1,
+        responseMimeType: 'application/json'
+      }
     })
 
-    const parsed = JSON.parse(completion.choices[0].message.content || '{}')
+    const result = await model.generateContent(prompt)
+    const parsed = JSON.parse(result.response.text())
 
     // Validate required fields
     if (!parsed.destination) {
@@ -79,7 +70,7 @@ Rules:
       confidence_score: parsed.confidence_score || 0.5,
     }
   } catch (error) {
-    console.error('OpenAI parsing error:', error)
+    console.error('Gemini parsing error:', error)
     throw new Error('Failed to parse email with AI')
   }
 }

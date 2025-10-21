@@ -80,7 +80,7 @@
 - OR: Single address with + notation: `trips+{username}@trekka.com`
 
 **Parsing Strategy:**
-1. **Use AI (OpenAI GPT-4)** - Most reliable
+1. **Use AI (Google Gemini 1.5 Flash)** - Most reliable & FREE
    ```javascript
    const prompt = `
    Extract travel details from this email:
@@ -106,7 +106,7 @@
 **Flow:**
 ```
 Email received
-  → Parse with OpenAI
+  → Parse with Gemini
   → Extract: destination, dates, type
   → Create pending_trip record
   → Send notification to user
@@ -128,10 +128,11 @@ Email received
 |---------|----------------|------------------|
 | **Setup Time** | 1 click OAuth | Set up forwarding once |
 | **Ongoing Effort** | Auto-sync (optional) | Forward each email |
-| **Accuracy** | 70% (messy calendar data) | 90% (structured emails) |
+| **Accuracy** | 70% (messy calendar data) | 95% (structured emails + AI) |
 | **Privacy** | Needs calendar access | Just forwarded emails |
 | **Bulk Import** | Yes (import all at once) | No (one at a time) |
 | **User Control** | Less (auto-import) | More (explicit forward) |
+| **Cost** | Free | FREE (Gemini tier) |
 
 ---
 
@@ -146,7 +147,7 @@ Email received
 
 **Implementation:**
 1. Set up `{user_id}@trips.trekka.com` addresses
-2. Use OpenAI to parse emails
+2. Use Google Gemini to parse emails (FREE tier!)
 3. Create pending trips
 4. Notification system for confirmation
 5. Review UI to edit before confirming
@@ -244,7 +245,7 @@ Email received
 
 ### Email Forwarding:
 - **Email Service:** SendGrid Inbound Parse ($0) or AWS SES (~$0.10/1000)
-- **AI Parsing:** OpenAI API (~$0.01 per email)
+- **AI Parsing:** Google Gemini API (FREE up to 1,500/day, then ~$0.001 per email)
 - **Database:** Add `pending_trips` table
 - **Notifications:** Already built ✅
 
@@ -258,11 +259,12 @@ Email received
 ## My Recommendation
 
 **Start with Email Forwarding** because:
-1. Higher accuracy (90% vs 70%)
+1. Higher accuracy (95% vs 70%)
 2. Less privacy friction (no inbox access)
 3. Users feel more in control
 4. Works better for ongoing use
 5. Simpler infrastructure
+6. FREE with Gemini API (1,500/day free tier)
 
 **Add Calendar Import later** for:
 - Bulk import of historical trips

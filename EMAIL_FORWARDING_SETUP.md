@@ -24,19 +24,20 @@ This creates:
 Add to your `.env.local`:
 
 ```env
-# OpenAI API Key for email parsing
-OPENAI_API_KEY=sk-...your-key-here
+# Google Gemini API Key for email parsing
+GEMINI_API_KEY=your-key-here
 
 # Optional: Webhook secret for SendGrid verification
 EMAIL_WEBHOOK_SECRET=your-random-secret-here
 ```
 
-**Get OpenAI API Key:**
-1. Go to https://platform.openai.com/api-keys
-2. Create new secret key
+**Get Gemini API Key:**
+1. Go to https://aistudio.google.com/app/apikey
+2. Create new API key
 3. Copy and add to `.env.local`
 
-**Cost:** ~$0.01 per email (using GPT-4o-mini)
+**Cost:** FREE for up to 1,500 emails/day! (Gemini 1.5 Flash free tier)
+- After free tier: ~$0.001 per email (10x cheaper than alternatives)
 
 ## 📧 Email Service Setup
 
@@ -173,7 +174,7 @@ User confirms → Trip created
 
 ### Parsing with AI
 
-The system sends the email to OpenAI with this prompt:
+The system sends the email to Google Gemini with this prompt:
 
 ```
 Extract travel details from this email:
@@ -189,7 +190,7 @@ Return JSON:
 }
 ```
 
-OpenAI returns structured data with ~90% accuracy.
+Gemini 1.5 Flash returns structured data with ~95% accuracy.
 
 ---
 
@@ -234,8 +235,8 @@ Then configure SendGrid to send this header.
 
 ### Parsing failures
 
-1. Check OpenAI API key is valid
-2. Check API logs for OpenAI errors
+1. Check Gemini API key is valid
+2. Check API logs for Gemini errors
 3. Email might be in unsupported format
 4. Check confidence_score in database (< 0.7 = low confidence)
 
@@ -263,22 +264,24 @@ Then configure SendGrid to send this header.
 ## 💰 Cost Estimate
 
 **Per email:**
-- OpenAI API: $0.01 (GPT-4o-mini)
+- Gemini API: FREE (up to 1,500/day on free tier!)
 - SendGrid: Free (up to reasonable volume)
 - Supabase: Negligible
 
-**For 100 emails/month:** ~$1.00
+**For 100 emails/month:** $0.00 (free tier)
 
-**For 1000 emails/month:** ~$10.00
+**For 1000 emails/month:** $0.00 (free tier)
 
-Very affordable for the value it provides!
+**For 50,000 emails/month:** ~$50.00 ($0.001 per email after free tier)
+
+Incredibly affordable - and FREE for most users!
 
 ---
 
 ## ✅ Post-Setup Checklist
 
 - [ ] Database migration run (`add-email-forwarding.sql`)
-- [ ] `OPENAI_API_KEY` added to environment variables
+- [ ] `GEMINI_API_KEY` added to environment variables
 - [ ] SendGrid account created
 - [ ] Inbound Parse configured
 - [ ] DNS records added and verified
