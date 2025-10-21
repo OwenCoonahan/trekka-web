@@ -2,6 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { getUser } from './auth'
+import { Database } from '@/types/database'
+
+type NotificationPreferences = Database['public']['Tables']['notification_preferences']['Row']
 
 export async function getNotifications() {
   const user = await getUser()
@@ -66,7 +69,7 @@ export async function markAllNotificationsAsRead() {
   if (error) throw new Error(error.message)
 }
 
-export async function getNotificationPreferences() {
+export async function getNotificationPreferences(): Promise<NotificationPreferences> {
   const user = await getUser()
   if (!user) throw new Error('Not authenticated')
 
@@ -88,12 +91,12 @@ export async function getNotificationPreferences() {
         .single()
 
       if (createError) throw new Error(createError.message)
-      return newPreferences
+      return newPreferences!
     }
     throw new Error(error.message)
   }
 
-  return preferences
+  return preferences!
 }
 
 export async function updateNotificationPreferences(formData: FormData) {

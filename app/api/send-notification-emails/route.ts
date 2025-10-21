@@ -35,13 +35,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Notification not found' }, { status: 404 })
     }
 
-    const profile = notification.profiles
+    const profile = notification.profiles as any
     const preferences = profile?.notification_preferences?.[0]
 
     // Only send email if user has email notifications enabled and has an email
     if (preferences?.email_notifications && profile?.email) {
       // Parse notification data based on type
-      let emailData = notification.data || {}
+      let emailData: any = notification.data || {}
 
       // For follow notifications, we already have the follower data
       if (notification.type === 'follow') {
@@ -64,8 +64,8 @@ export async function POST(request: NextRequest) {
 
         if (!tripError && trip) {
           emailData = {
-            ...trip,
-            creator: trip.profiles
+            ...trip as any,
+            creator: (trip as any).profiles
           }
         }
       }

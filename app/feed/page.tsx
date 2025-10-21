@@ -62,7 +62,7 @@ export default async function FeedPage() {
 
   const popularDestinations = Object.entries(tripsByDestination)
     .sort(([,a]: any, [,b]: any) => b.length - a.length)
-    .slice(0, 6)
+    .slice(0, 6) as [string, any[]][]
 
   return (
     <LayoutWrapper>
