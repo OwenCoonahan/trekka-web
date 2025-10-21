@@ -81,10 +81,18 @@ export function Navigation({ user, profile, showBack = false }: NavigationProps)
                 </Link>
               )}
 
+              {/* Desktop logout - full button with text */}
               <form action={signOut} className="hidden md:block">
                 <Button variant="ghost" size="sm" type="submit">
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
+                </Button>
+              </form>
+
+              {/* Mobile logout - icon only */}
+              <form action={signOut} className="md:hidden">
+                <Button variant="ghost" size="sm" type="submit">
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </form>
             </div>

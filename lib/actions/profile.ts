@@ -28,17 +28,20 @@ export async function updateProfile(formData: FormData) {
 
   const validatedData = profileSchema.parse(data)
 
+  // Use upsert to handle both new profiles and updates
   const { error } = await supabase
     .from('profiles')
-    .update({
+    .upsert({
+      id: user.id,
       username: validatedData.username,
       display_name: validatedData.display_name || null,
       bio: validatedData.bio || null,
       occupation: validatedData.occupation || null,
       base_location: validatedData.base_location || null,
       links: validatedData.links || {},
-    } as any)
-    .eq('id', user.id)
+    } as any, {
+      onConflict: 'id',
+    })
 
   if (error) {
     if (error.code === '23505') {
