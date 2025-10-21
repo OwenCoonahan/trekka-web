@@ -106,7 +106,7 @@ export default async function HomePage() {
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
               <Image
                 src="/images/hero-2.jpg"
-                alt="Friends surfing together at golden hour sunset"
+                alt="Ocean waves crashing on rocky coastline with clear blue sky"
                 fill
                 className="object-cover"
               />
