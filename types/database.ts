@@ -139,6 +139,7 @@ export interface Database {
           trip_updated: boolean
           city_overlap: boolean
           follow: boolean
+          trip_interest: boolean
           email_notifications: boolean
           sms_notifications: boolean
           phone_number: string | null
@@ -152,6 +153,7 @@ export interface Database {
           trip_updated?: boolean
           city_overlap?: boolean
           follow?: boolean
+          trip_interest?: boolean
           email_notifications?: boolean
           sms_notifications?: boolean
           phone_number?: string | null
@@ -165,6 +167,7 @@ export interface Database {
           trip_updated?: boolean
           city_overlap?: boolean
           follow?: boolean
+          trip_interest?: boolean
           email_notifications?: boolean
           sms_notifications?: boolean
           phone_number?: string | null

@@ -110,6 +110,7 @@ export async function updateNotificationPreferences(formData: FormData) {
     trip_updated: formData.get('trip_updated') === 'on',
     city_overlap: formData.get('city_overlap') === 'on',
     follow: formData.get('follow') === 'on',
+    trip_interest: formData.get('trip_interest') === 'on',
     email_notifications: formData.get('email_notifications') === 'on',
     sms_notifications: formData.get('sms_notifications') === 'on',
     phone_number: formData.get('phone_number') as string || null,

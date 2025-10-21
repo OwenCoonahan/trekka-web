@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import { ArrowLeft, Bell, Mail, MessageSquare, MapPin, User, Plus, Edit } from 'lucide-react'
+import { ArrowLeft, Bell, Mail, MessageSquare, MapPin, User, Plus, Edit, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { getNotificationPreferences, updateNotificationPreferences } from '@/lib/actions/notifications'
 // import { PushNotificationSetup } from '@/components/push-notification-setup'
@@ -18,6 +18,7 @@ interface NotificationPreferences {
   trip_updated: boolean
   city_overlap: boolean
   follow: boolean
+  trip_interest: boolean
   email_notifications: boolean
   sms_notifications: boolean
   phone_number: string | null
@@ -29,6 +30,7 @@ export default function NotificationPreferencesPage() {
     trip_updated: true,
     city_overlap: true,
     follow: true,
+    trip_interest: true,
     email_notifications: false,
     sms_notifications: false,
     phone_number: null
@@ -45,6 +47,7 @@ export default function NotificationPreferencesPage() {
           trip_updated: data.trip_updated ?? true,
           city_overlap: data.city_overlap ?? true,
           follow: data.follow ?? true,
+          trip_interest: data.trip_interest ?? true,
           email_notifications: data.email_notifications ?? false,
           sms_notifications: data.sms_notifications ?? false,
           phone_number: data.phone_number || null
@@ -181,6 +184,22 @@ export default function NotificationPreferencesPage() {
                       name="follow"
                       checked={preferences.follow}
                       onCheckedChange={(checked) => handleToggle('follow', checked)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Heart className="h-4 w-4 text-pink-500" />
+                      <div>
+                        <Label htmlFor="trip_interest" className="font-medium">Trip Interest</Label>
+                        <p className="text-sm text-muted-foreground">Get notified when someone expresses interest in your trips</p>
+                      </div>
+                    </div>
+                    <Switch
+                      id="trip_interest"
+                      name="trip_interest"
+                      checked={preferences.trip_interest}
+                      onCheckedChange={(checked) => handleToggle('trip_interest', checked)}
                     />
                   </div>
                 </div>
