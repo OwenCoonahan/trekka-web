@@ -22,6 +22,7 @@ export interface Database {
           created_at: string
           email: string | null
           base_location: string | null
+          email_import_id: string | null
         }
         Insert: {
           id: string
@@ -35,6 +36,7 @@ export interface Database {
           created_at?: string
           email?: string | null
           base_location?: string | null
+          email_import_id?: string | null
         }
         Update: {
           id?: string
@@ -48,6 +50,7 @@ export interface Database {
           created_at?: string
           email?: string | null
           base_location?: string | null
+          email_import_id?: string | null
         }
       }
       trips: {
@@ -129,6 +132,65 @@ export interface Database {
           status?: 'interested' | 'not_interested'
           message?: string | null
           created_at?: string
+        }
+      }
+      pending_trips: {
+        Row: {
+          id: string
+          user_id: string
+          destination: string
+          start_date: string | null
+          end_date: string | null
+          description: string | null
+          email_subject: string | null
+          email_from: string | null
+          email_body: string | null
+          confirmation_number: string | null
+          trip_type: string | null
+          parsed_data: Json
+          confidence_score: number | null
+          status: string
+          reviewed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          destination: string
+          start_date?: string | null
+          end_date?: string | null
+          description?: string | null
+          email_subject?: string | null
+          email_from?: string | null
+          email_body?: string | null
+          confirmation_number?: string | null
+          trip_type?: string | null
+          parsed_data?: Json
+          confidence_score?: number | null
+          status?: string
+          reviewed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          destination?: string
+          start_date?: string | null
+          end_date?: string | null
+          description?: string | null
+          email_subject?: string | null
+          email_from?: string | null
+          email_body?: string | null
+          confirmation_number?: string | null
+          trip_type?: string | null
+          parsed_data?: Json
+          confidence_score?: number | null
+          status?: string
+          reviewed_at?: string | null
+          created_at?: string
+          updated_at?: string
         }
       }
       notification_preferences: {

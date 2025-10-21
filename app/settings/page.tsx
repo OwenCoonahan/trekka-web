@@ -12,9 +12,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { updateProfile, uploadAvatar } from '@/lib/actions/profile'
+import { getEmailImportAddress } from '@/lib/actions/pending-trips'
 import { profileSchema } from '@/lib/utils/validation'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, Upload, ArrowLeft, Bell, Plane } from 'lucide-react'
+import { Loader2, Upload, ArrowLeft, Bell, Plane, Mail, Copy, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { z } from 'zod'
@@ -25,6 +26,8 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string>('')
   const [profile, setProfile] = useState<any>(null)
+  const [emailImportAddress, setEmailImportAddress] = useState<string>('')
+  const [copied, setCopied] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -75,7 +78,24 @@ export default function SettingsPage() {
     }
 
     loadProfile()
+    loadEmailAddress()
   }, [supabase, router, form])
+
+  async function loadEmailAddress() {
+    try {
+      const address = await getEmailImportAddress()
+      setEmailImportAddress(address)
+    } catch (error) {
+      console.error('Failed to load email import address:', error)
+    }
+  }
+
+  function copyEmailAddress() {
+    navigator.clipboard.writeText(emailImportAddress)
+    setCopied(true)
+    toast.success('Email address copied!')
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   async function handleAvatarUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -320,9 +340,48 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="pt-4 border-t">
+                <div className="pt-4 border-t space-y-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium">📧 Email Import</h3>
+                      <Link href="/trips/pending">
+                        <Button variant="ghost" size="sm">
+                          View Pending
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="p-4 bg-muted rounded-lg space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Forward flight and hotel confirmations to automatically create trips
+                      </p>
+                      {emailImportAddress && (
+                        <div className="flex gap-2">
+                          <div className="flex-1 p-2 bg-background rounded border font-mono text-sm break-all">
+                            {emailImportAddress}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={copyEmailAddress}
+                          >
+                            {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      )}
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p>How it works:</p>
+                        <ol className="list-decimal list-inside space-y-0.5 ml-2">
+                          <li>Forward your booking email to the address above</li>
+                          <li>We'll extract the trip details with AI</li>
+                          <li>Review and confirm the trip in one click</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+
                   <Link href="/notifications/preferences">
-                    <Button variant="outline" className="w-full mb-4">
+                    <Button variant="outline" className="w-full">
                       <Bell className="h-4 w-4 mr-2" />
                       Notification Preferences
                     </Button>
