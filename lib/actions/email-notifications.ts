@@ -42,7 +42,7 @@ function getEmailTemplate(type: string, data: any): { subject: string; html: str
   switch (type) {
     case 'trip_added':
       return {
-        subject: `✈️ ${data.creator.display_name} is planning a trip to ${data.destination}`,
+        subject: `✈️ ${data.creator_display_name || data.creator?.display_name || 'Someone'} is planning a trip to ${data.destination}`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
@@ -51,7 +51,7 @@ function getEmailTemplate(type: string, data: any): { subject: string; html: str
 
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
               <h2 style="margin: 0 0 15px 0; color: #1e293b;">
-                ${data.creator.display_name} just added a trip to <strong>${data.destination}</strong>
+                ${data.creator_display_name || data.creator?.display_name || 'Someone'} just added a trip to <strong>${data.destination}</strong>
               </h2>
 
               <div style="margin: 10px 0;">
@@ -74,7 +74,7 @@ function getEmailTemplate(type: string, data: any): { subject: string; html: str
             </div>
 
             <div style="text-align: center; color: #64748b; font-size: 14px; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
-              <p>This email was sent because you follow ${data.creator.display_name} on Trekka.</p>
+              <p>This email was sent because you follow ${data.creator_display_name || data.creator?.display_name || 'them'} on Trekka.</p>
               <p><a href="${baseUrl}/notifications/preferences" style="color: #2563eb;">Manage your notification preferences</a></p>
             </div>
           </div>
@@ -83,7 +83,7 @@ function getEmailTemplate(type: string, data: any): { subject: string; html: str
 
     case 'trip_updated':
       return {
-        subject: `📝 ${data.creator.display_name} updated their trip to ${data.destination}`,
+        subject: `📝 ${data.creator_display_name || data.creator?.display_name || 'Someone'} updated their trip to ${data.destination}`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
@@ -92,7 +92,7 @@ function getEmailTemplate(type: string, data: any): { subject: string; html: str
 
             <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fed7aa;">
               <h2 style="margin: 0 0 15px 0; color: #9a3412;">
-                ${data.creator.display_name} updated their trip to <strong>${data.destination}</strong>
+                ${data.creator_display_name || data.creator?.display_name || 'Someone'} updated their trip to <strong>${data.destination}</strong>
               </h2>
 
               <div style="margin: 10px 0;">
@@ -151,7 +151,7 @@ function getEmailTemplate(type: string, data: any): { subject: string; html: str
 
     case 'city_overlap':
       return {
-        subject: `🏙️ ${data.creator.display_name} is visiting your area!`,
+        subject: `🏙️ ${data.creator_display_name || data.creator?.display_name || 'Someone'} is visiting your area!`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
@@ -160,7 +160,7 @@ function getEmailTemplate(type: string, data: any): { subject: string; html: str
 
             <div style="background: #ecfdf5; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;">
               <h2 style="margin: 0 0 15px 0; color: #065f46;">
-                ${data.creator.display_name} is planning a trip to <strong>${data.destination}</strong>
+                ${data.creator_display_name || data.creator?.display_name || 'Someone'} is planning a trip to <strong>${data.destination}</strong>
               </h2>
 
               <div style="margin: 10px 0;">
@@ -220,10 +220,10 @@ function formatDateRange(startDate: string, endDate: string): string {
 export async function sendNotificationEmails(notificationType: string, notificationData: any, recipientUserIds: string[]) {
   const supabase = await createClient()
 
-  // Get user emails and preferences
+  // Get user emails
   const { data: recipients, error } = await supabase
     .from('profiles')
-    .select('id, username, display_name, email, notification_preferences(*)')
+    .select('id, username, display_name, email')
     .in('id', recipientUserIds)
 
   if (error || !recipients) {
@@ -233,13 +233,18 @@ export async function sendNotificationEmails(notificationType: string, notificat
 
   // Send emails to users who have email notifications enabled
   for (const recipient of recipients) {
-    const preferences = recipient.notification_preferences?.[0]
+    // Get notification preferences for this user
+    const { data: preferences } = await supabase
+      .from('notification_preferences')
+      .select('*')
+      .eq('user_id', (recipient as any).id)
+      .single()
 
-    if (preferences?.email_notifications && recipient.email) {
+    if (preferences?.email_notifications && (recipient as any).email) {
       await sendEmailNotification({
         type: notificationType as any,
-        recipientEmail: recipient.email,
-        recipientName: recipient.display_name || recipient.username,
+        recipientEmail: (recipient as any).email,
+        recipientName: (recipient as any).display_name || (recipient as any).username,
         data: notificationData
       })
     }

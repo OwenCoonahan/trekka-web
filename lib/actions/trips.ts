@@ -138,20 +138,16 @@ async function sendTripNotifications(type: 'trip_added' | 'trip_updated', trip: 
 
   if (!creator) return
 
-  // Get followers who want this type of notification
+  // Get followers with their notification preferences
   const { data: followers } = await supabase
     .from('follows')
     .select(`
       follower_id,
-      profiles!follows_follower_id_fkey (
+      follower:profiles!follows_follower_id_fkey (
         id,
         username,
         display_name,
-        email,
-        notification_preferences (
-          ${type},
-          email_notifications
-        )
+        email
       )
     `)
     .eq('followed_id', trip.creator_id)
@@ -167,11 +163,19 @@ async function sendTripNotifications(type: 'trip_added' | 'trip_updated', trip: 
 
   // Send notifications to each follower
   for (const follower of followers) {
-    const profile = follower.profiles
-    const preferences = profile?.notification_preferences?.[0]
+    const profile = (follower as any).follower
+    if (!profile) continue
+
+    // Get notification preferences for this user
+    const { data: preferences } = await supabase
+      .from('notification_preferences')
+      .select('*')
+      .eq('user_id', profile.id)
+      .single()
 
     // Check if user wants this type of notification
-    if (!preferences || !preferences[type]) continue
+    const wantsNotification = type === 'trip_added' ? preferences?.trip_added : preferences?.trip_updated
+    if (!preferences || !wantsNotification) continue
 
     // Send email if enabled
     if (preferences.email_notifications && profile?.email) {

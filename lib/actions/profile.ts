@@ -5,7 +5,7 @@ import { profileSchema } from '@/lib/utils/validation'
 import { redirect } from 'next/navigation'
 import { getUser } from './auth'
 
-export async function updateProfile(formData: FormData) {
+export async function updateProfile(formData: FormData, skipRedirect = false) {
   const user = await getUser()
   if (!user) throw new Error('Not authenticated')
 
@@ -50,8 +50,12 @@ export async function updateProfile(formData: FormData) {
     throw new Error(error.message)
   }
 
-  // Use server-side redirect to ensure cache is invalidated
-  redirect('/feed')
+  // Use server-side redirect to ensure cache is invalidated (unless skipped)
+  if (!skipRedirect) {
+    redirect('/feed')
+  }
+
+  return { success: true }
 }
 
 export async function uploadAvatar(file: File) {

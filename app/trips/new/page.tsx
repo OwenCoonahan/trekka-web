@@ -73,7 +73,7 @@ export default function NewTripPage() {
   return (
     <>
       <ClientNavigation />
-      <div className="min-h-screen p-4 py-8">
+      <div className="min-h-screen p-4 py-8 pb-24 md:pb-8">
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>

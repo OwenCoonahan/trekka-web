@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { updateProfile, uploadAvatar } from '@/lib/actions/profile'
+import { toggleFollow } from '@/lib/actions/social'
 import { profileSchema } from '@/lib/utils/validation'
 import { Loader2, Upload, Plane } from 'lucide-react'
 import { toast } from 'sonner'
@@ -69,10 +70,33 @@ export default function OnboardingPage() {
     formData.append('x', values.links?.x || '')
     formData.append('website', values.links?.website || '')
 
+    // Check if user should follow someone after signup
+    const followUserId = sessionStorage.getItem('follow-after-signup')
+    const redirectUrl = sessionStorage.getItem('redirect-after-signup')
+    const hasFollowIntent = !!followUserId
+
     try {
-      await updateProfile(formData)
-      // Server action will handle redirect to /feed
+      // Skip server redirect if we need to handle follow logic
+      await updateProfile(formData, hasFollowIntent)
       toast.success('Profile created successfully!')
+
+      // If there's a follow intent, execute it and then redirect
+      if (followUserId) {
+        try {
+          await toggleFollow(followUserId)
+          sessionStorage.removeItem('follow-after-signup')
+          sessionStorage.removeItem('redirect-after-signup')
+          toast.success('You are now following this user!')
+
+          // Redirect to the profile or feed
+          router.push(redirectUrl || '/feed')
+        } catch (error) {
+          console.error('Failed to follow user:', error)
+          // Still redirect even if follow fails
+          router.push(redirectUrl || '/feed')
+        }
+      }
+      // If no follow intent, server action already handled redirect
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Something went wrong')
       setIsLoading(false)

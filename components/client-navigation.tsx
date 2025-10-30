@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { UserAvatar } from '@/components/user-avatar'
 import { NotificationBell } from '@/components/notification-bell'
-import { Home, MapPin, User, LogOut, Plus, ArrowLeft, Bell } from 'lucide-react'
+import { Home, Compass, User, LogOut, Plus, ArrowLeft, Bell } from 'lucide-react'
 import { signOut } from '@/lib/actions/auth'
 import { createClient } from '@/lib/supabase/client'
 
@@ -34,88 +34,131 @@ export function ClientNavigation() {
 
   if (!user) return null
 
+  const isActive = (path: string) => pathname === path
+
   return (
-    <nav className="border-b bg-background">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-4">
-
-            <Link href="/feed" className="font-bold text-xl">
-              Trekka
-            </Link>
-
-            <div className="hidden md:flex items-center gap-2 ml-8">
-              <Link href="/feed">
-                <Button variant={pathname === '/feed' ? 'default' : 'ghost'} size="sm">
-                  <Home className="h-4 w-4 mr-2" />
-                  Feed
-                </Button>
+    <>
+      {/* Top Navigation - Desktop & Mobile Header */}
+      <nav className="border-b bg-background">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <Link href="/feed" className="font-bold text-xl">
+                Trekka
               </Link>
 
-              <Link href="/trips/new">
-                <Button variant={pathname === '/trips/new' ? 'default' : 'ghost'} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Trip
-                </Button>
-              </Link>
-
-              {profile?.username && (
-                <Link href={`/u/${profile.username}`}>
-                  <Button variant={pathname === `/u/${profile.username}` ? 'default' : 'ghost'} size="sm">
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex items-center gap-2 ml-8">
+                <Link href="/feed">
+                  <Button variant={isActive('/feed') ? 'default' : 'ghost'} size="sm">
+                    <Home className="h-4 w-4 mr-2" />
+                    Feed
                   </Button>
                 </Link>
+
+                <Link href="/discover">
+                  <Button variant={isActive('/discover') ? 'default' : 'ghost'} size="sm">
+                    <Compass className="h-4 w-4 mr-2" />
+                    Discover
+                  </Button>
+                </Link>
+
+                <Link href="/trips/new">
+                  <Button variant={isActive('/trips/new') ? 'default' : 'ghost'} size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Trip
+                  </Button>
+                </Link>
+
+                {profile?.username && (
+                  <Link href={`/u/${profile.username}`}>
+                    <Button variant={pathname.startsWith(`/u/${profile.username}`) ? 'default' : 'ghost'} size="sm">
+                      <User className="h-4 w-4 mr-2" />
+                      Profile
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* Right side - Desktop & Mobile */}
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+
+              {profile && (
+                <Link href={`/u/${profile.username}`} className="hidden md:block">
+                  <UserAvatar
+                    src={profile.avatar_url}
+                    alt={profile.display_name || profile.username}
+                    size="sm"
+                    className="cursor-pointer"
+                  />
+                </Link>
               )}
+
+              {/* Desktop logout - full button with text */}
+              <form action={signOut} className="hidden md:block">
+                <Button variant="ghost" size="sm" type="submit">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </form>
+
+              {/* Mobile logout - icon only */}
+              <form action={signOut} className="md:hidden">
+                <Button variant="ghost" size="sm" type="submit">
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </form>
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-
-            {profile && (
-              <Link href={`/u/${profile.username}`}>
-                <UserAvatar
-                  src={profile.avatar_url}
-                  alt={profile.display_name || profile.username}
-                  size="sm"
-                  className="cursor-pointer"
-                />
-              </Link>
-            )}
-
-            <form action={signOut}>
-              <Button variant="ghost" size="sm" type="submit">
-                <LogOut className="h-4 w-4 mr-2" />
-                <span className="hidden md:inline">Logout</span>
-              </Button>
-            </form>
-          </div>
         </div>
+      </nav>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden flex items-center gap-2 pb-3">
-          <Link href="/feed" className="flex-1">
-            <Button variant={pathname === '/feed' ? 'default' : 'outline'} size="sm" className="w-full">
-              <Home className="h-4 w-4" />
-            </Button>
+      {/* Bottom Navigation - Mobile Only */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t z-50 safe-area-inset-bottom">
+        <div className="flex items-center justify-around h-16 px-2">
+          <Link href="/feed" className="flex flex-col items-center justify-center flex-1 h-full">
+            <div className={`flex flex-col items-center gap-1 transition-colors ${
+              isActive('/feed') ? 'text-primary' : 'text-muted-foreground'
+            }`}>
+              <Home className={`h-5 w-5 ${isActive('/feed') ? 'fill-current' : ''}`} />
+              <span className="text-xs font-medium">Feed</span>
+            </div>
           </Link>
 
-          <Link href="/trips/new" className="flex-1">
-            <Button variant={pathname === '/trips/new' ? 'default' : 'outline'} size="sm" className="w-full">
-              <Plus className="h-4 w-4" />
-            </Button>
+          <Link href="/discover" className="flex flex-col items-center justify-center flex-1 h-full">
+            <div className={`flex flex-col items-center gap-1 transition-colors ${
+              isActive('/discover') ? 'text-primary' : 'text-muted-foreground'
+            }`}>
+              <Compass className={`h-5 w-5 ${isActive('/discover') ? 'fill-current' : ''}`} />
+              <span className="text-xs font-medium">Discover</span>
+            </div>
+          </Link>
+
+          <Link href="/trips/new" className="flex flex-col items-center justify-center flex-1 h-full">
+            <div className={`flex flex-col items-center gap-1 transition-colors ${
+              isActive('/trips/new') ? 'text-primary' : 'text-muted-foreground'
+            }`}>
+              <div className={`rounded-full p-2 ${isActive('/trips/new') ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'}`}>
+                <Plus className="h-5 w-5" />
+              </div>
+              <span className="text-xs font-medium">New</span>
+            </div>
           </Link>
 
           {profile?.username && (
-            <Link href={`/u/${profile.username}`} className="flex-1">
-              <Button variant={pathname === `/u/${profile.username}` ? 'default' : 'outline'} size="sm" className="w-full">
-                <User className="h-4 w-4" />
-              </Button>
+            <Link href={`/u/${profile.username}`} className="flex flex-col items-center justify-center flex-1 h-full">
+              <div className={`flex flex-col items-center gap-1 transition-colors ${
+                pathname.startsWith(`/u/${profile.username}`) ? 'text-primary' : 'text-muted-foreground'
+              }`}>
+                <User className={`h-5 w-5 ${pathname.startsWith(`/u/${profile.username}`) ? 'fill-current' : ''}`} />
+                <span className="text-xs font-medium">Profile</span>
+              </div>
             </Link>
           )}
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   )
 }

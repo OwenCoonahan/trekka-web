@@ -10,6 +10,7 @@ import { TripCalendar } from '@/components/trip-calendar'
 import { FollowButton } from '@/components/follow-button'
 import { CopyLinkButton } from '@/components/copy-link-button'
 import { SocialLinks } from '@/components/social-links'
+import { ProfileSignupBanner } from '@/components/profile-signup-banner'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -130,6 +131,19 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         </Tabs>
       </div>
       </div>
+
+      {/* Show signup banner for non-authenticated users */}
+      {!currentUser && (
+        <ProfileSignupBanner
+          profile={{
+            id: typedProfile.id,
+            username: typedProfile.username,
+            display_name: typedProfile.display_name,
+            avatar_url: typedProfile.avatar_url,
+          }}
+          upcomingTripsCount={upcomingTrips.length}
+        />
+      )}
     </LayoutWrapper>
   )
 }
